@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>App Allenamento</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+    }
+
+    header {
+      background-color: #222;
+      color: white;
+      text-align: center;
+      padding: 1rem;
+    }
+
+    main {
+      max-width: 500px;
+      margin: 20px auto;
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    label, select, input, button {
+      display: block;
+      width: 100%;
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+
+    input, select {
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .exercise {
+      background: #fafafa;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      margin-bottom: 10px;
+    }
+
+    .exercise h3 {
+      margin: 0;
+    }
+
+    @media (max-width: 600px) {
+      main {
+        margin: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Allenamento 🏋️‍♂️</h1>
+  </header>
+
+  <main>
+    <label for="day">Giorno:</label>
+    <select id="day">
+      <option value="Lunedì">Lunedì</option>
+      <option value="Martedì">Martedì</option>
+      <option value="Mercoledì">Mercoledì</option>
+      <option value="Giovedì">Giovedì</option>
+      <option value="Venerdì">Venerdì</option>
+      <option value="Sabato">Sabato</option>
+      <option value="Domenica">Domenica</option>
+    </select>
+
+    <label for="exercise">Esercizio:</label>
+    <input type="text" id="exercise" placeholder="Esempio: Panca piana">
+
+    <label for="weight">Peso (kg):</label>
+    <input type="number" id="weight" placeholder="Esempio: 60">
+
+    <label for="reps">Ripetizioni:</label>
+    <input type="text" id="reps" placeholder="Esempio: 8-8-6 o Drop set">
+
+    <button id="addBtn">➕ Aggiungi esercizio</button>
+
+    <div id="exerciseList"></div>
+  </main>
+
+  <script>
+    const addBtn = document.getElementById('addBtn');
+    const daySelect = document.getElementById('day');
+    const exerciseInput = document.getElementById('exercise');
+    const weightInput = document.getElementById('weight');
+    const repsInput = document.getElementById('reps');
+    const list = document.getElementById('exerciseList');
+
+    let data = JSON.parse(localStorage.getItem('workoutData')) || {};
+
+    function render() {
+      list.innerHTML = '';
+      const day = daySelect.value;
+      const exercises = data[day] || [];
+      exercises.forEach((ex, i) => {
+        const div = document.createElement('div');
+        div.classList.add('exercise');
+        div.innerHTML = `
+          <h3>${ex.name}</h3>
+          <p><strong>Peso:</strong> ${ex.weight} kg</p>
+          <p><strong>Reps/Note:</strong> ${ex.reps}</p>
+          <button onclick="deleteExercise('${day}', ${i})">❌ Elimina</button>
+        `;
+        list.appendChild(div);
+      });
+    }
+
+    addBtn.addEventListener('click', () => {
+      const day = daySelect.value;
+      const name = exerciseInput.value.trim();
+      const weight = weightInput.value.trim();
+      const reps = repsInput.value.trim();
+      if (!name) return alert('Inserisci un nome esercizio!');
+      if (!data[day]) data[day] = [];
+      data[day].push({ name, weight, reps });
+      localStorage.setItem('workoutData', JSON.stringify(data));
+      exerciseInput.value = '';
+      weightInput.value = '';
+      repsInput.value = '';
+      render();
+    });
+
+    function deleteExercise(day, index) {
+      data[day].splice(index, 1);
+      localStorage.setItem('workoutData', JSON.stringify(data));
+      render();
+    }
+
+    daySelect.addEventListener('change', render);
+    render();
+  </script>
+</body>
+</html>
